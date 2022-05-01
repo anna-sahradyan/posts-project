@@ -1,1 +1,1 @@
-## Open https://post-project-9af53.firebaseapp.com/  to view it in the browser.
+## Open https://posts-project-17771.web.app/ to view it in the browser.
