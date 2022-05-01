@@ -1,4 +1,4 @@
-@import "../common/color";
+@import "../../common/color";
 
 .contentDiv {
   position: relative;
@@ -48,9 +48,6 @@
   position: absolute;
   top: -70px;
   left: -20px;
+
 }
 
-.paginationBttns{
-display: flex;
-  border:1px solid red;
-}

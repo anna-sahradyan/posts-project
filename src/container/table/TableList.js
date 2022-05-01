@@ -3,28 +3,25 @@ import s from './TableList.module.scss';
 import Table from 'react-bootstrap/Table';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {useDispatch, useSelector} from "react-redux";
-import {fetchAsyncGetPosts, fetchAsyncGetPostsId, selectPost} from "../store/postSlice";
-import TableBox from "../components/tableBox";
-import {Pagination, Stack, Typography} from "@mui/material";
-import {brown} from "@mui/material/colors";
-import {useParams} from "react-router-dom";
-import SearchList from "./search/SearchList";
-import ReactPaginate from "react-paginate";
+import {fetchAsyncGetPosts, selectPost} from "../../store/postSlice";
+import TableBox from "../../components/tableBox";
+import {Pagination, PaginationItem, Typography} from "@mui/material";
+import {Link, useLocation} from "react-router-dom";
+import InputContainer from "../../components/search/InputConteiner";
 
 
 const TableList = () => {
+    const location = useLocation();
     const [inputValue, setInputValue] = useState('');
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(parseInt(location.search?.split('=')[1] || 0));
     const postsPerPage = 10;
     const pagesVisited = page * postsPerPage + 1;
     const dispatch = useDispatch();
     const posts = useSelector(selectPost);
     const [sortPost, setSortPost] = useState([]);
+    const [order, setOrder] = useState('ASC');
     const [flag, setFlag] = useState(false)
     const pageCount = Math.ceil(posts.length / postsPerPage - 1);
-    const handleChange = (event, value) => {
-        setPage(value);
-    }
     let itemsSort = sortPost.slice(pagesVisited, pagesVisited + postsPerPage).map((item) => {
         return {...item}
     });
@@ -32,7 +29,6 @@ const TableList = () => {
         return {...item}
     });
     //!search
-
     let search = posts.filter((item) => {
         if (inputValue === '') {
             return item;
@@ -45,107 +41,97 @@ const TableList = () => {
     let itemSearch = search.slice(pagesVisited, pagesVisited + postsPerPage).map((item) => {
         return {...item}
     });
-    console.log(itemSearch)
+    console.log(itemSearch);
     //!get posts
     useEffect(() => {
         dispatch(fetchAsyncGetPosts());
     }, [dispatch]);
+
     //!sort posts
     const handleClick = (field) => {
         const copySort = posts.concat();
         setSortPost(copySort);
         const sortData = copySort.sort((a, b) => {
-            const title = a[field] > b[field];
-            const postTitle = a[field] > b[field];
+            const title = a[field] < b[field];
+            const postTitle = b[field] > a[field];
             return title || postTitle ? 1 : -1;
+
+
         });
-        setSortPost(sortData);
+        setSortPost(sortData)
         setFlag(true);
     }
+
+
 //!next
     const increment = () => {
         setPage(prev => prev + 1);
-        return setPage(prev=>prev-1);
+
     }
     //!prev
     const decrement = () => {
-        setPage(prev => prev - 1);
-        return setPage(prev=>prev-1);
+        setPage((page) => page - 1);
 
+    }
+    //!pagination
+    const handleChange = (event, value) => {
+        setPage(value);
 
     }
 
+    return (<>
+        <div className={s.contentDiv}>
+            <div className={s.content}>
+                {/*!partInput*/}
+                <div className={s.input}>
+                    <InputContainer inputValue={inputValue} setInputValue={setInputValue}/>
+                </div>
+                <div className={s.tableContainer}>
+                    <Table striped bordered hover className={s.table}>
+                        <thead>
+                        <tr className={s.thead}>
+                            <th>ID <ArrowDropDownIcon/></th>
+                            <th>Заголовок <ArrowDropDownIcon onClick={() => handleClick(posts.title)}/></th>
+                            <th>Описание <ArrowDropDownIcon/></th>
+                        </tr>
+                        </thead>
+                    </Table>
+                    {flag ? (itemsSort.map((item, index) => <TableBox key={`${item}_${index}`} title={item.title}
+                                                                      id={item.id}
+                                                                      body={item.body}/>)) : (itemsPosts.map((item, index) =>
+                        <TableBox key={`${item}_${index}`} title={item.title} id={item.id} body={item.body}/>))}
+                    {/*!partInputContainer */}
+                    {(inputValue !== '') && itemSearch.map((item, index) => <TableBox key={`${item}_${index}`}
+                                                                                      title={item.title}
+                                                                                      id={item.id}
+                                                                                      body={item.body}/>)}
+                </div>
+                {/*!partPagination*/}
+                <div className={s.page}>
+                    <Pagination
+                        page={page}
+                        count={10}
+                        onChange={handleChange}
 
-    const changePage = ({ selected }) => {
-        setPage(selected);
-    };
-    return (
-        <>
-            <div className={s.contentDiv}>
-                <div className={s.content}>
-                    <div className={s.input}>
-                        <SearchList inputValue={inputValue} setInputValue={setInputValue}/>
-                    </div>
-                    <div className={s.tableContainer}>
-                        <Table striped bordered hover className={s.table}>
-                            <thead>
-                            <tr className={s.thead}>
-                                <th>ID <ArrowDropDownIcon/></th>
-                                <th>Заголовок <ArrowDropDownIcon onClick={() => handleClick(posts.title)}/></th>
-                                <th>Описание <ArrowDropDownIcon/></th>
-                            </tr>
-                            </thead>
-                        </Table>
-                        {flag ? (itemsSort.map((item, index) => <TableBox key={`${item}_${index}`} title={item.title}
-                                                                          id={item.id}
-                                                                          body={item.body}/>)) : (itemsPosts.map((item, index) =>
-                            <TableBox key={`${item}_${index}`} title={item.title} id={item.id} body={item.body}/>))}
-                        {/*!partInput*/}
-                        {inputValue !== '' && itemSearch.map((item, index) => <TableBox key={`${item}_${index}`}
-                                                                                        title={item.title}
-                                                                                        id={item.id}
-                                                                                        body={item.body}/>)}
-                    </div>
-                    <div className={s.partPosts}>
+                        renderItem={(item) => (<PaginationItem
+                            component={Link}
+                            to={`/post${item.page === 1 ? '' : `?page=${item.page}`}`}
+                            {...item}
+                        />)}
+                    />
+                    <Typography style={{
+                        position: "absolute", left: "-300px",
 
-                    </div>
-                    <div className={s.page}>
-                        {/*<ReactPaginate*/}
-                        {/*    previousLabel={"Prev"}*/}
-                        {/*    nextLabel={"Next"}*/}
-                        {/*    pageCount={pageCount}*/}
-                        {/*    onPageChange={changePage}*/}
-                        {/*    containerClassName={"paginationBttns"}*/}
-                        {/*    previousLinkClassName={"previousBttn"}*/}
-                        {/*    nextLinkClassName={"nextBttn"}*/}
-                        {/*    disabledClassName={"paginationDisabled"}*/}
-                        {/*     activeClassName={"paginationActive"}*/}
-                        {/*/>*/}
-                        <Stack spacing={2}>
-                            <Typography style={{
-                                position: "absolute",
-                                left: "-400px",
-                                top: '20px',
-                                fontWeight: "bold"
-                            }} onClick={increment}>Next</Typography>
+                        fontWeight: "bold"
+                    }} onClick={decrement}>Назад</Typography>
+                    <Typography style={{position: "absolute", left: "500px", fontWeight: "bold"}}
+                                onClick={increment}>Далее</Typography>
 
-                            <Pagination count={10} page={page} onChange={handleChange} sx={{
-                                color: brown[800], '&.Mui-checked': {
-                                    color: brown[600],
-                                },
-                            }}
 
-                            />
-
-                            <Typography style={{position: "absolute", left: "550px", fontWeight: "bold"}}
-                                        onClick={decrement}>Prev</Typography>
-                        </Stack>
-
-                    </div>
                 </div>
             </div>
-        </>
-    );
+        </div>
+    </>);
 };
 
 export default TableList;

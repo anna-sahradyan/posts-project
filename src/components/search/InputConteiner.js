@@ -3,7 +3,7 @@ import {Box,  TextField} from "@mui/material";
 
 
 
-const SearchList = ({inputValue, setInputValue, handelPress}) => {
+const InputContainer = ({inputValue, setInputValue, handelPress}) => {
 
     return (
         <>
@@ -29,4 +29,4 @@ const SearchList = ({inputValue, setInputValue, handelPress}) => {
     );
 };
 
-export default SearchList;
+export default InputContainer;

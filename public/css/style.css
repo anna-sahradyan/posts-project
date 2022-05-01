@@ -15,7 +15,7 @@
 body {
     position: relative;
     min-height: 100%;
-    background-color: #CCD1D1;
+    background-color: #E7E9EE !important;
 }
 html{
     height: 100%;
