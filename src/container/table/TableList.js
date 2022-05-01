@@ -5,7 +5,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {useDispatch, useSelector} from "react-redux";
 import {fetchAsyncGetPosts, selectPost} from "../../store/postSlice";
 import TableBox from "../../components/tableBox";
-import {Pagination, PaginationItem, Typography} from "@mui/material";
+import {Pagination, PaginationItem,Typography} from "@mui/material";
 import {Link, useLocation} from "react-router-dom";
 import InputContainer from "../../components/search/InputConteiner";
 
@@ -52,12 +52,12 @@ const TableList = () => {
         const copySort = posts.concat();
         setSortPost(copySort);
         const sortData = copySort.sort((a, b) => {
-            const title = a[field] < b[field];
-            const postTitle = b[field] > a[field];
+            const title = a[field].toLowerCase() < b[field].toLowerCase();
+            const postTitle = b[field].toLowerCase() > a[field].toLowerCase();
+
             return title || postTitle ? 1 : -1;
-
-
         });
+        console.log(sortData)
         setSortPost(sortData)
         setFlag(true);
     }
@@ -91,11 +91,15 @@ const TableList = () => {
                         <thead>
                         <tr className={s.thead}>
                             <th>ID <ArrowDropDownIcon/></th>
-                            <th>Заголовок <ArrowDropDownIcon onClick={() => handleClick(posts.title)}/></th>
+                            <th>Заголовок <ArrowDropDownIcon onClick={() => handleClick('title')}/></th>
                             <th>Описание <ArrowDropDownIcon/></th>
                         </tr>
                         </thead>
                     </Table>
+
+
+
+
                     {flag ? (itemsSort.map((item, index) => <TableBox key={`${item}_${index}`} title={item.title}
                                                                       id={item.id}
                                                                       body={item.body}/>)) : (itemsPosts.map((item, index) =>
